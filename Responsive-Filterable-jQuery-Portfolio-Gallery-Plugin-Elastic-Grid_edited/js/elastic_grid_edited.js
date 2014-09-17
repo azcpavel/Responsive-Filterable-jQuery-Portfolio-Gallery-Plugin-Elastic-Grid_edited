@@ -374,7 +374,7 @@ $(function() {
                             }
                             K.attr("src", gthumbs[C]);
                             K.attr("data-large", glarge[C]);
-                            K.css('height','150px');
+                            K.css('height','100px');
                             i.append(K);
                             N.append(i);
                             L.append(N)
