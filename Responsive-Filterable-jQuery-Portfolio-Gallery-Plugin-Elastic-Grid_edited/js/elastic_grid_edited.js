@@ -18,8 +18,8 @@
                 {
                     'title'         : 'Simple Accounting',
                     'description'   : 'Accounting System<br> * Development Tool: PHP5, Codeigniter, jQuery <br>* Transaction Management<br>* Asset management<br>* User Management<br>* E-Payment Management<br>* Dropdown Management<br>Username: admin<br>Password: 1234',
-                    'thumbnail'     : ['http://www.itszahid.com/images/acc/thumb/1.jpg', 'http://www.itszahid.com/images/acc/thumb/2.jpg'],
-                    'large'         : ['<img src="http://www.itszahid.com/images/acc/1.png"/>', '<img src="http://www.itszahid.com/images/acc/2.png"/>'],
+                    'thumbnail'     : ['http://www.itszahid.info/images/acc/thumb/1.jpg', 'http://www.itszahid.info/images/acc/thumb/2.jpg'],
+                    'large'         : ['<img src="http://www.itszahid.info/images/acc/1.png"/>', '<img src="http://www.itszahid.info/images/acc/2.png"/>'],
                     'button_list'   :
                     [
                         { 'title':'Demo', 'url' : 'http://www.exceptionsolutions.com/projects/account' }                        
