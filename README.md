@@ -6,7 +6,7 @@ Loading html instead of image with random fx
 
 Just use elastic_grid_edited.js & load with this function
 
-Note: try to keep yout thumb img height to 100px
+Note: try to keep your thumb img height to 100px
 
 
 ```
