@@ -9,11 +9,11 @@ Just use elastic_grid_edited.js & load with this function
 
 Note: try to keep your thumb img height to 100px
 
+
+```
 <script src="js/jquery.hoverdir.js"></script>
 <script src="js/jquery.elastislide.js"> </script>
 
-
-```
 $(function(){
         var fxrand = Math.floor((Math.random() * 5) + 1);
         var fx = ['fallperspective', 'fly', 'flip', 'helix' , 'popup'];
