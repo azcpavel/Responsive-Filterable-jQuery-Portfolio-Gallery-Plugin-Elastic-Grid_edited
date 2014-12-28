@@ -1,957 +1,853 @@
-/*  @author pavel <azc.pavel@gmail.com>
+/*  
+*   @author vukhanhtruong
+*   @edited by Ahsan Zahid Chowdhury <azc.pavel@gmail.com>
 *   @date 2014-09-17
-*   @EDITED loading html instead of image with random fx
-*
-*
-*   $(function(){
-        var fxrand = Math.floor((Math.random() * 5) + 1);
-        var fx = ['fallperspective', 'fly', 'flip', 'helix' , 'popup'];
-        $("#elastic_grid").elastic_grid({
-            'filterEffect': fx[fxrand], // moveup, scaleup, fallperspective, fly, flip, helix , popup
-            'hoverDirection': true,
-            'hoverDelay': 0,
-            'hoverInverse': false,
-            'expandingSpeed': 500,
-            'expandingHeight': 570,
-            'items' :
-            [
-                {
-                    'title'         : 'Simple Accounting',
-                    'description'   : 'Accounting System<br> * Development Tool: PHP5, Codeigniter, jQuery <br>* Transaction Management<br>* Asset management<br>* User Management<br>* E-Payment Management<br>* Dropdown Management<br>Username: admin<br>Password: 1234',
-                    'thumbnail'     : ['http://www.itszahid.info/images/acc/thumb/1.jpg', 'http://www.itszahid.info/images/acc/thumb/2.jpg'],
-                    'large'         : ['<img src="http://www.itszahid.info/images/acc/1.png"/>', '<img src="http://www.itszahid.info/images/acc/2.png"/>'],
-                    'button_list'   :
-                    [
-                        { 'title':'Demo', 'url' : 'http://www.exceptionsolutions.com/projects/account' }                        
-                    ],
-                    'tags'          : ['Web Application']                    
-                }
-            ]
-        });
-});
+*   loading html instead of image
+*   added hideInfoBox config for hide title in infobox    
+*   added onClickEvent config for exec after click on figure
+*   added navigation config & options
+*   
 */
 
-var $event = $.event, $special, resizeTimeout;
-$special = $event.special.debouncedresize = {setup: function() {
-        $(this).on("resize", $special.handler)
-    }, teardown: function() {
-        $(this).off("resize", $special.handler)
-    }, handler: function(e, a) {
-        var d = this, c = arguments, b = function() {
-            e.type = "debouncedresize";
-            $event.dispatch.apply(d, c)
-        };
-        if (resizeTimeout) {
-            clearTimeout(resizeTimeout)
+/*
+* debouncedresize: special jQuery event that happens once after a window resize
+*
+* latest version and complete README available on Github:
+* https://github.com/louisremi/jquery-smartresize/blob/master/jquery.debouncedresize.js
+*
+* Copyright 2011 @louis_remi
+* Licensed under the MIT license.
+*/
+var $event = $.event,
+$special,
+resizeTimeout;
+
+$special = $event.special.debouncedresize = {
+    setup: function() {
+        $( this ).on( "resize", $special.handler );
+    },
+    teardown: function() {
+        $( this ).off( "resize", $special.handler );
+    },
+    handler: function( event, execAsap ) {
+        // Save the context
+        var context = this,
+            args = arguments,
+            dispatch = function() {
+                // set correct event type
+                event.type = "debouncedresize";
+                $event.dispatch.apply( context, args );
+            };
+
+        if ( resizeTimeout ) {
+            clearTimeout( resizeTimeout );
         }
-        a ? b() : resizeTimeout = setTimeout(b, $special.threshold)
-    }, threshold: 250};
-var BLANK = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
-$.fn.imagesLoaded = function(h) {
-    var e = this, j = $.isFunction($.Deferred) ? $.Deferred() : 0, i = $.isFunction(j.notify), b = e.find("img").add(e.filter("img")), c = [], g = [], d = [];
-    if ($.isPlainObject(h)) {
-        $.each(h, function(k, l) {
-            if (k === "callback") {
-                h = l
-            } else {
-                if (j) {
-                    j[k](l)
-                }
-            }
-        })
-    }
-    function f() {
-        var k = $(g), l = $(d);
-        if (j) {
-            if (d.length) {
-                j.reject(b, k, l)
-            } else {
-                j.resolve(b)
-            }
-        }
-        if ($.isFunction(h)) {
-            h.call(e, b, k, l)
-        }
-    }
-    function a(k, l) {
-        if (k.src === BLANK || $.inArray(k, c) !== -1) {
-            return
-        }
-        c.push(k);
-        if (l) {
-            d.push(k)
-        } else {
-            g.push(k)
-        }
-        $.data(k, "imagesLoaded", {isBroken: l, src: k.src});
-        if (i) {
-            j.notifyWith($(k), [l, b, $(g), $(d)])
-        }
-        if (b.length === c.length) {
-            setTimeout(f);
-            b.unbind(".imagesLoaded")
-        }
-    }
-    if (!b.length) {
-        f()
-    } else {
-        b.bind("load.imagesLoaded error.imagesLoaded", function(k) {
-            a(k.target, k.type === "error")
-        }).each(function(k, m) {
-            var n = m.src;
-            var l = $.data(m, "imagesLoaded");
-            if (l && l.src === n) {
-                a(m, l.isBroken);
-                return
-            }
-            if (m.complete && m.naturalWidth !== undefined) {
-                a(m, m.naturalWidth === 0 || m.naturalHeight === 0);
-                return
-            }
-            if (m.readyState || m.complete) {
-                m.src = BLANK;
-                m.src = n
-            }
-        })
-    }
-    return j ? j.promise(e) : e
+
+        execAsap ?
+            dispatch() :
+            resizeTimeout = setTimeout( dispatch, $special.threshold );
+    },
+    threshold: 250
 };
-$(function() {
-    $.elastic_grid = {version: "1.0"};
-    $.fn.elastic_grid = function(G) {
-        G = $.extend({}, {items: null, filterEffect: "", hoverDirection: true, hoverDelay: 0, hoverInverse: false, expandingHeight: 500, expandingSpeed: 300, callback: function() {
-            }}, G);
-        var u = $(this);
-        var H = G.items.length;
-        if (H == 0) {
-            return false
+
+// ======================= imagesLoaded Plugin ===============================
+// https://github.com/desandro/imagesloaded
+
+// $('#my-container').imagesLoaded(myFunction)
+// execute a callback when all images have loaded.
+// needed because .load() doesn't work on cached images
+
+// callback function gets image collection as argument
+//  this is the container
+
+// original: MIT license. Paul Irish. 2010.
+// contributors: Oren Solomianik, David DeSandro, Yiannis Chatzikonstantinou
+
+// blank image data-uri bypasses webkit log warning (thx doug jones)
+var BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+
+$.fn.imagesLoaded = function( callback ) {
+    var $this = this,
+        deferred = $.isFunction($.Deferred) ? $.Deferred() : 0,
+        hasNotify = $.isFunction(deferred.notify),
+        $images = $this.find('img').add( $this.filter('img') ),
+        loaded = [],
+        proper = [],
+        broken = [];
+
+    // Register deferred callbacks
+    if ($.isPlainObject(callback)) {
+        $.each(callback, function (key, value) {
+            if (key === 'callback') {
+                callback = value;
+            } else if (deferred) {
+                deferred[key](value);
+            }
+        });
+    }
+
+    function doneLoading() {
+        var $proper = $(proper),
+            $broken = $(broken);
+
+        if ( deferred ) {
+            if ( broken.length ) {
+                deferred.reject( $images, $proper, $broken );
+            } else {
+                deferred.resolve( $images );
+            }
         }
-        u.html('<div class="wagwep-container"><nav id="porfolio-nav" class="clearfix"><ul id="portfolio-filter" class="nav nav-tabs clearfix"></ul></nav></div>');
-        var g = "";
-        var o = $('<ul id="og-grid" class="og-grid"></ul>');
-        for (itemIdx = 0; itemIdx < H; itemIdx++) {
-            if (G.items[itemIdx] != undefined) {
-                var E = G.items[itemIdx];
-                liObject = $("<li></li>");
-                tags = E.tags;
+
+        if ( $.isFunction( callback ) ) {
+            callback.call( $this, $images, $proper, $broken );
+        }
+    }
+
+    function imgLoaded( img, isBroken ) {
+        // don't proceed if BLANK image, or image is already loaded
+        if ( img.src === BLANK || $.inArray( img, loaded ) !== -1 ) {
+            return;
+        }
+
+        // store element in loaded images array
+        loaded.push( img );
+
+        // keep track of broken and properly loaded images
+        if ( isBroken ) {
+            broken.push( img );
+        } else {
+            proper.push( img );
+        }
+
+        // cache image and its state for future calls
+        $.data( img, 'imagesLoaded', { isBroken: isBroken, src: img.src } );
+
+        // trigger deferred progress method if present
+        if ( hasNotify ) {
+            deferred.notifyWith( $(img), [ isBroken, $images, $(proper), $(broken) ] );
+        }
+
+        // call doneLoading and clean listeners if all images are loaded
+        if ( $images.length === loaded.length ){
+            setTimeout( doneLoading );
+            $images.unbind( '.imagesLoaded' );
+        }
+    }
+
+    // if no images, trigger immediately
+    if ( !$images.length ) {
+        doneLoading();
+    } else {
+        $images.bind( 'load.imagesLoaded error.imagesLoaded', function( event ){
+            // trigger imgLoaded
+            imgLoaded( event.target, event.type === 'error' );
+        }).each( function( i, el ) {
+            var src = el.src;
+
+            // find out if this image has been already checked for status
+            // if it was, and src has not changed, call imgLoaded on it
+            var cached = $.data( el, 'imagesLoaded' );
+            if ( cached && cached.src === src ) {
+                imgLoaded( el, cached.isBroken );
+                return;
+            }
+
+            // if complete is true and browser supports natural sizes, try
+            // to check for image status manually
+            if ( el.complete && el.naturalWidth !== undefined ) {
+                imgLoaded( el, el.naturalWidth === 0 || el.naturalHeight === 0 );
+                return;
+            }
+
+            // cached images don't fire load sometimes, so we reset src, but only when
+            // dealing with IE, or image is complete (loaded) and failed manual check
+            // webkit hack from http://groups.google.com/group/jquery-dev/browse_thread/thread/eee6ab7b2da50e1f
+            if ( el.readyState || el.complete ) {
+                el.src = BLANK;
+                el.src = src;
+            }
+        });
+    }
+
+    return deferred ? deferred.promise( $this ) : $this;
+};
+
+/**
+ * jquery elastic_grid
+ *
+ * Copyright 2013, vukhanhtruong
+ * http://www.bonchen.net
+ */
+$(function() {
+    $.elastic_grid = {
+        version: '1.0'
+    };
+    $.fn.elastic_grid = function(config){
+        config = $.extend({}, {
+            items: null,
+            filterEffect: '',
+            hoverDirection: true,
+            hoverDelay: 0,
+            hoverInverse: false,
+            expandingHeight: 500,
+            expandingSpeed: 300,
+            exHideInfoBoxTitle: false, // Added New Variable For Hiding Title in infobox 
+            exControls: false, // Added new variable for control flag
+            exControlsCSS : {position:'absolute', cursor:'pointer', padding : 5, marginTop : '15%'}, // Added new variable for control css
+            exControlsNextText : 'Next', // Added new variable for control next text
+            exControlsNextClass : null, // Added new variable for control next class
+            exControlsPrevText : 'Prev', // Added new variable for control prev text
+            exControlsPrevClass : null, // Added new variable for control prev class
+            exOnClickEvent: function() {}, // Added New Variable For After Click Action
+            callback: function() {}
+        }, config);                        
+
+        // initial container object
+        var container = $(this);
+        // number of questions
+        var numOfItems = config.items.length;
+        if(numOfItems == 0){
+            return false;
+        }
+
+        //initial filter nav
+        container.html('<div class="wagwep-container"><nav id="porfolio-nav" class="clearfix"><ul id="portfolio-filter" class="nav nav-tabs clearfix"></ul></nav></div>');
+
+        //initial items
+        var gridContent = "";
+        var ulObject = $('<ul id="og-grid" class="og-grid"></ul>');
+        for (itemIdx = 0; itemIdx < numOfItems; itemIdx++) {
+            if(config.items[itemIdx] != undefined){
+                var item = config.items[itemIdx];
+
+                //initial new li
+                liObject = $('<li></li>');
+
+                //get tags
+                tags = item.tags;
                 strTag = "";
-                for (var C = tags.length - 1; C >= 0; C--) {
-                    strTag += "," + tags[C]
-                }
+                for (var i = tags.length - 1; i >= 0; i--) {
+                    strTag += ","+tags[i];
+                };
                 strTag = strTag.substring(1);
-                liObject.attr("data-tags", strTag);
-                aObject = $("<a></a>");
-                aObject.attr("href", "javascript:;;");
-                imgObject = $("<img/>");
-                imgObject.attr("src", E.thumbnail[0]);
-                imgObject.attr("data-largesrc", E.large[0]);
-                spanObject = $("<span></span>");
-                spanObject.html(E.title);
-                figureObject = $("<figure></figure>");
+                liObject.attr('data-tags', strTag);
+
+                //initial a object
+                aObject = $('<a></a>'); // Added Class for exec event
+                aObject.attr('href', 'javascript:;;');                
+
+                //initial default photo
+                imgObject = $('<img/>');
+                imgObject.attr('src', item.thumbnail[0]);
+                imgObject.attr('data-largesrc', item.large[0]);
+
+
+                //initial hover direction
+                spanObject = $('<span></span>');
+                spanObject.html(item.title);
+                figureObject = $('<figure></figure>');
                 figureObject.append(spanObject);
+
                 imgObject.appendTo(aObject);
                 figureObject.appendTo(aObject);
                 aObject.appendTo(liObject);
-                liObject.appendTo(o)
+                liObject.appendTo(ulObject);
             }
         }
-        if (G.filterEffect == "") {
-            G.filterEffect = "moveup"
+        if(config.filterEffect == ''){
+            config.filterEffect = 'moveup';
         }
-        o.addClass("effect-" + G.filterEffect);
-        o.appendTo(u);
-        if (G.hoverDirection == true) {
-            o.find("li").each(function() {
-                $(this).hoverdir({hoverDelay: G.hoverDelay, inverse: G.hoverInverse})
-            })
+        ulObject.addClass('effect-'+config.filterEffect);
+        ulObject.appendTo(container);
+/**************************************************************************
+* HOVER DIR
+***************************************************************************/
+        if(config.hoverDirection == true){
+            ulObject.find('li').each( function() {
+                $(this).hoverdir({
+                    hoverDelay : config.hoverDelay,
+                    inverse : config.hoverInverse
+                });
+            } );
         }
-        var m = u.find("#portfolio-filter");
-        var x = o.find("li"), c = {};
-        numOfTag = 0;
-        x.each(function(J) {
-            var K = $(this), I = K.data("tags").split(",");
-            K.attr("data-id", J);
-            K.addClass("all");
-            $.each(I, function(i, L) {
-                L = $.trim(L);
-                K.addClass(L.toLowerCase().replace(" ", "-"));
-                if (!(L in c)) {
-                    c[L] = [];
-                    numOfTag++
-                }
-                c[L].push(K)
-            })
-        });
-        if (numOfTag > 1) {
-            f("All");
-            $.each(c, function(I, i) {
-                f(I)
-            })
-        } else {
-            m.remove()
-        }
-        m.find("a").bind("click", function(I) {
-            k.find("li.og-expanded").find("a").trigger("click");
-            k.find(".og-close").trigger("click");
-            $this = $(this);
-            $this.css("outline", "none");
-            m.find(".current").removeClass("current");
-            $this.parent().addClass("current");
-            var J = $this.text().toLowerCase().replace(" ", "-");
-            var i = H;
-            o.find("li").each(function(K, L) {
-                classie.remove(L, "hidden");
-                classie.remove(L, "animate");
-                if (!--i) {
-                    setTimeout(function() {
-                        p(o.find("li"), J)
-                    }, 1)
-                }
-            });
-            return false
-        });
-        function p(i, I) {
-            i.each(function(J, K) {
-                if (classie.has(K, I)) {
-                    classie.toggle(K, "animate");
-                    classie.remove(K, "hidden")
-                } else {
-                    classie.add(K, "hidden");
-                    classie.remove(K, "animate")
-                }
-            })
-        }
-        m.find("li:first").addClass("current");
-        function f(K) {
-            var J = K.toLowerCase().replace(" ", "-");
-            if (K != "") {
-                var i = $("<li>");
-                var I = $("<a>", {html: K, "data-filter": "." + J, href: "#", "class": "filter"}).appendTo(i);
-                i.appendTo(m)
+
+/**************************************************************************
+* Tags to filter
+***************************************************************************/
+    var porfolio_filter = container.find('#portfolio-filter');
+    var items = ulObject.find('li'),
+    itemsByTags = {};
+    numOfTag = 0;
+
+    // Looping though all the li items:
+
+    items.each(function(i){
+        var elem = $(this),
+        tags = elem.data('tags').split(',');
+
+        // Adding a data-id attribute. Required by the Quicksand plugin:
+        elem.attr('data-id',i);
+
+        elem.addClass('all');
+        $.each(tags,function(key,value){
+            // Removing extra whitespace:
+            value = $.trim(value);
+
+            //add class tags to li
+            elem.addClass(value.toLowerCase().replace(' ','-'));
+
+            if(!(value in itemsByTags)){
+                // Create an empty array to hold this item:
+                itemsByTags[value] = [];
+                numOfTag++;
             }
+
+            // Each item is added to one array per tag:
+            itemsByTags[value].push(elem);
+        });
+
+    });
+
+    if(numOfTag > 1){
+        // Creating the "Everything" option in the menu:
+        createList('All');
+
+        // Looping though the arrays in itemsByTags:
+        $.each(itemsByTags,function(k,v){
+            createList(k);
+        });
+    }else{
+        porfolio_filter.remove();
+    }
+
+
+    porfolio_filter.find('a').bind('click',function(e){
+        //close expanding preview
+        $grid.find('li.og-expanded').find('a').trigger('click');
+        $grid.find('.og-close').trigger('click');
+
+        $this = $(this);
+        $this.css('outline','none');
+        porfolio_filter.find('.current').removeClass('current');
+        $this.parent().addClass('current');
+
+        var filterVal = $this.text().toLowerCase().replace(' ','-');
+        var count  = numOfItems;
+        ulObject.find('li').each( function(i, el) {
+            classie.remove( el, 'hidden' );
+            classie.remove( el, 'animate' );
+            if(!--count){
+                setTimeout( function() {
+                    doAnimateItems(ulObject.find('li'), filterVal);
+                }, 1);
+            }
+        });
+
+        return false;
+    });
+
+    function doAnimateItems(objectLi, filterVal){
+        objectLi.each(function(i, el) {
+            if(classie.has( el, filterVal ) ) {
+                classie.toggle( el, 'animate' );
+                classie.remove( el, 'hidden' );
+            }else{
+                classie.add( el, 'hidden' );
+                classie.remove( el, 'animate' );
+            }
+        });
+    }
+
+    porfolio_filter.find('li:first').addClass('current');
+
+    function createList(text){
+        var filter = text.toLowerCase().replace(' ','-');
+        // This is a helper function that takes the
+        // text of a menu button and array of li items
+        if(text != ''){
+            var li = $('<li>');
+            var a = $('<a>',{
+                html: text,
+                'data-filter': '.'+filter,
+                href:'#',
+                'class':'filter',
+            }).appendTo(li);
+
+            li.appendTo(porfolio_filter);
         }
-        var k = o, h = k.children("li"), y = -1, t = -1, F = 0, q = 10, w = $(window), d, A = $("html, body"), B = {WebkitTransition: "webkitTransitionEnd", MozTransition: "transitionend", OTransition: "oTransitionEnd", msTransition: "MSTransitionEnd", transition: "transitionend"}, j = B[Modernizr.prefixed("transition")], s = Modernizr.csstransitions, D = {minHeight: G.expandingHeight, speed: G.expandingSpeed, easing: "ease"};
-        function v(i) {
-            h = h.add(i);
-            i.each(function() {
-                var I = $(this);
-                I.data({offsetTop: I.offset().top, height: I.height()})
-            });
-            l(i)
+    }
+/**************************************************************************
+* EXPANDING
+***************************************************************************/
+        // list of items
+        var $grid = ulObject,
+            // the items
+            $items = $grid.children( 'li' ),
+            // current expanded item's index
+            current = -1,
+            // position (top) of the expanded item
+            // used to know if the preview will expand in a different row
+            previewPos = -1,
+            // extra amount of pixels to scroll the window
+            scrollExtra = 0,
+            // extra margin when expanded (between preview overlay and the next items)
+            marginExpanded = 10,
+            $window = $( window ), winsize,
+            $body = $( 'html, body' ),
+            // transitionend events
+            transEndEventNames = {
+                'WebkitTransition' : 'webkitTransitionEnd',
+                'MozTransition' : 'transitionend',
+                'OTransition' : 'oTransitionEnd',
+                'msTransition' : 'MSTransitionEnd',
+                'transition' : 'transitionend'
+            },
+            transEndEventName = transEndEventNames[ Modernizr.prefixed( 'transition' ) ],
+            // support for csstransitions
+            support = Modernizr.csstransitions,
+            // default settings
+            settings = {
+                minHeight : config.expandingHeight,
+                speed : config.expandingSpeed,
+                easing : 'ease'
+            };
+
+
+        // add more items to the grid.
+        // the new items need to appended to the grid.
+        // after that call Grid.addItems(theItems);
+        function addItems( $newitems ) {
+
+            $items = $items.add( $newitems );
+
+            $newitems.each( function() {
+                var $item = $( this );
+                $item.data( {
+                    offsetTop : $item.offset().top,
+                    height : $item.height()
+                } );
+            } );
+
+            initItemsEvents( $newitems );
+
         }
-        function r(i) {
-            h.each(function() {
-                var I = $(this);
-                I.data("offsetTop", I.offset().top);
-                if (i) {
-                    I.data("height", I.height())
+
+        // saves the item´s offset top and height (if saveheight is true)
+        function saveItemInfo( saveheight ) {
+            $items.each( function() {
+                var $item = $( this );
+                $item.data( 'offsetTop', $item.offset().top );
+                if( saveheight ) {
+                    $item.data( 'height', $item.height() );
                 }
-            })
+            } );
         }
-        function n() {
-            l(h);
-            w.on("debouncedresize", function() {
-                F = 0;
-                t = -1;
-                r();
-                b();
-                var i = $.data(this, "preview");
-                if (typeof i != "undefined") {
-                    z()
+
+        function initEvents() {
+
+            // when clicking an item, show the preview with the item´s info and large image.
+            // close the item if already expanded.
+            // also close if clicking on the item´s cross
+            initItemsEvents( $items );
+
+            // on window resize get the window´s size again
+            // reset some values..
+            $window.on( 'debouncedresize', function() {
+
+                scrollExtra = 0;
+                previewPos = -1;
+                // save item´s offset
+                saveItemInfo();
+                getWinSize();                
+
+                var preview = $.data( this, 'preview' );
+                if( typeof preview != 'undefined' ) {
+                    hidePreview();
                 }
-            })
+
+            } );
+
         }
-        function l(i) {
-            i.on("click", "span.og-close", function() {
-                z();
-                return false
-            }).children("a").on("click", function(J) {
-                var I = $(this).parent();
-                I.removeClass("animate");
-                y === I.index() ? z($(this)) : a(I);
-                return false
-            })
+
+        function initItemsEvents( $items ) {
+            $items.on( 'click', 'span.og-close', function() {
+                hidePreview();
+                return false;
+            } ).children( 'a' ).on( 'click', function(e) {
+                var $item = $( this ).parent();
+                //$(this).addClass('unhoverdir');
+                //remove animate class
+                $item.removeClass('animate');
+
+                // check if item already opened
+                current === $item.index() ? hidePreview($(this)) : showPreview( $item );
+                return false;
+
+            } );
         }
-        function b() {
-            d = {width: w.width(), height: w.height()}
+
+        function getWinSize() {
+            winsize = { width : $window.width(), height : $window.height() };
         }
-        function a(I) {
-            z();
-            var J = $.data(this, "preview"), i = I.data("offsetTop");
-            F = 0;
-            if (typeof J != "undefined") {
-                if (t !== i) {
-                    if (i > t) {
-                        F = J.height
+
+        function showPreview( $item ) {
+            hidePreview();
+
+            // console.log('--show--');
+
+            var preview = $.data( this, 'preview' ),
+                // item´s offset top
+                position = $item.data( 'offsetTop' );
+
+            scrollExtra = 0;
+
+            // if a preview exists and previewPos is different (different row) from item´s top then close it
+            if( typeof preview != 'undefined' ) {
+
+                // not in the same row
+                if( previewPos !== position ) {
+                    // if position > previewPos then we need to take te current preview´s height in consideration when scrolling the window
+                    if( position > previewPos ) {
+                        scrollExtra = preview.height;
                     }
-                    z()
-                } else {
-                    J.update(I);
-                    return false
+                    hidePreview();
                 }
+                // same row
+                else {
+                    preview.update( $item );
+                    return false;
+                }
+
             }
-            t = i;
-            J = $.data(this, "preview", new e(I));
-            J.open()
+
+            // update previewPos
+            previewPos = position;
+            // initialize new preview for the clicked item
+            preview = $.data( this, 'preview', new Preview( $item ) );
+            // expand preview overlay
+            preview.open();
+
         }
-        function z() {
-            h.find(".og-pointer").remove();
-            y = -1;
-            var i = $.data(this, "preview");
-            if (typeof i == "undefined") {
-            } else {
-                i.close()
+
+        function hidePreview() {
+            //hide pointer
+            $items.find('.og-pointer').remove();
+
+            current = -1;
+            var preview = $.data( this, 'preview' );
+
+            if(typeof preview == "undefined"){
+                //do nothing
+            }else{
+                preview.close();
             }
-            $.removeData(this, "preview")
+            $.removeData( this, 'preview' );
         }
-        function e(i) {
-            this.$item = i;
+
+        // the preview obj / overlay
+        function Preview( $item ) {
+            this.$item = $item;
             this.expandedIdx = this.$item.index();
             this.create();
-            this.update()
+            this.update();
+            config.exOnClickEvent();
         }
-        e.prototype = {create: function() {
-                this.$title = $("<h3></h3>");
-                this.$description = $("<p></p>");
-                this.$href = $('<a href="#">Visit website</a>');
-                this.$detailButtonList = $('<span class="buttons-list"></span>');
-                this.$details = $('<div class="og-details"></div>').append(this.$title, this.$description, this.$detailButtonList);
-                this.$loading = $('<div class="og-loading"></div>');
-                this.$fullimage = $('<div class="og-fullimg"></div>').append(this.$loading);
-                this.$closePreview = $('<span class="og-close"></span>');
-                this.$previewInner = $('<div class="og-expander-inner"></div>').append(this.$closePreview, this.$fullimage, this.$details);
-                this.$previewEl = $('<div class="og-expander"></div>').append(this.$previewInner);
-                this.$item.append($('<div class="og-pointer"></div>'));
-                this.$item.append(this.getEl());
-                if (s) {
-                    this.setTransition()
+
+        Preview.prototype = {
+            create : function() {
+                // create Preview structure:
+
+                /**************************************************************************/
+                // Adding element and event for navigation
+                
+                if(config.exControls == true){
+                    
+                    this.$itemNext = $('<span>'+config.exControlsNextText+'</span>');
+                    this.$itemNext.css({right:0});
+                    if(config.exControlsCSS != null)
+                        this.$itemNext.css(config.exControlsCSS);                    
+                    if(config.exControlsNextClass != null)
+                        this.$itemNext.addClass(config.exControlsNextClass);                    
+                    this.$itemNext.click(function(){
+                        showPreview($(this).parent().parent().parent().next());                                       
+                    });
+
+                    this.$itemPrev = $('<span>'+config.exControlsPrevText+'</span>');
+                    this.$itemPrev.css({left:0});                    
+                    if(config.exControlsCSS != null)
+                        this.$itemPrev.css(config.exControlsCSS);
+                    if(config.exControlsPrevClass != null)
+                        this.$itemPrev.addClass(config.exControlsPrevClass);                                        
+                    this.$itemPrev.click(function(){
+                        showPreview($(this).parent().parent().parent().prev());                                       
+                    });
                 }
-            }, update: function(J) {
-                if (J) {
-                    this.$item = J
+
+                /**************************************************************************/
+
+
+                this.$title = $( '<h3></h3>' );
+                this.$description = $( '<p></p>' );
+                this.$href = $( '<a href="#">Visit website</a>' );
+                this.$detailButtonList = $( '<span class="buttons-list"></span>' );
+                this.$details = $( '<div class="og-details"></div>' ).append( this.$title, this.$description, this.$detailButtonList );
+                this.$loading = $( '<div class="og-loading"></div>' );
+                this.$fullimage = $( '<div class="og-fullimg"></div>' ).append( this.$loading );
+                this.$closePreview = $( '<span class="og-close"></span>' );                
+                this.$previewInner = $( '<div class="og-expander-inner"></div>' ).append( this.$itemNext, this.$itemPrev, this.$closePreview, this.$fullimage, this.$details );
+                this.$previewEl = $( '<div class="og-expander"></div>' ).append( this.$previewInner );
+
+                // append preview element to the item
+                this.$item.append( $('<div class="og-pointer"></div>') );
+                this.$item.append( this.getEl() );                
+
+                // set the transitions for the preview and the item
+                if( support ) {
+                    this.setTransition();
                 }
-                if (y !== -1) {
-                    var O = h.eq(y);
-                    O.removeClass("og-expanded");
-                    this.$item.addClass("og-expanded");
-                    this.positionPreview()
+            },
+            update : function( $item ) {
+
+                if( $item ) {
+                    this.$item = $item;
                 }
-                y = this.$item.index();
-                if (typeof G.items[y] === "undefined") {
-                } else {
-                    eldata = G.items[y];
-                    this.$title.html(eldata.title);
-                    this.$description.html(eldata.description);
+
+                // if already expanded remove class "og-expanded" from current item and add it to new item
+                if( current !== -1 ) {
+                    var $currentItem = $items.eq( current );
+                    $currentItem.removeClass( 'og-expanded' );
+                    this.$item.addClass( 'og-expanded' );
+                    // position the preview correctly
+                    this.positionPreview();
+                }
+
+                // update current value
+                current = this.$item.index();
+
+
+                // update preview´s content
+                if(typeof config.items[current] === "undefined"){
+                    //nothing happen
+                }else{
+                    eldata = config.items[current];
+
+                    if(config.exHideInfoBoxTitle == false) //Checking Config
+                    this.$title.html( eldata.title );
+
+                    this.$description.html( eldata.description );
+                    //clear current button list
                     this.$detailButtonList.html("");
                     urlList = eldata.button_list;
-                    if (urlList.length > 0) {
-                        for (C = 0; C < urlList.length; C++) {
-                            var i = $("<a></a>");
-                            i.addClass("link-button");
-                            if (C == 0) {
-                                i.addClass("first")
+
+                    if(urlList.length > 0)
+                    {
+                        for (i = 0; i < urlList.length; i++)
+                        {
+                            var ObjA = $('<a></a>');
+                            ObjA.addClass('link-button');
+                            if(i==0){
+                                ObjA.addClass('first');
                             }
-                            i.attr("href", urlList[C]["url"]);
-                            i.html(urlList[C]["title"]);
-                            this.$detailButtonList.append(i)
+                            ObjA.attr("href", urlList[i]['url']);
+                            ObjA.html( urlList[i]['title']);
+                            this.$detailButtonList.append(ObjA);
                         }
                     }
-                    var I = this;
-                    if (typeof I.$largeImg != "undefined") {
-                        I.$largeImg.remove()
+
+                   var self = this;
+
+                    // remove the current image in the preview
+                    if( typeof self.$largeImg != 'undefined' ) {
+                        self.$largeImg.remove();
                     }
+
+
+                    //relate photo
                     glarge = eldata.large;
                     gthumbs = eldata.thumbnail;
-                    if (glarge.length == gthumbs.length && glarge.length > 0) {
-                        var L = $("<ul></ul>");
-                        for (C = 0; C < gthumbs.length; C++) {
-                            var N = $("<li></li>");
-                            var i = $('<a href="javascript:;;"></a>');
-                            var K = $("<img/>");
-                            K.addClass("related_photo");
-                            if (C == 0) {
-                                K.addClass("selected")
+                    if(glarge.length == gthumbs.length && glarge.length > 0){
+                        var ObjUl = $('<ul></ul>');
+                        for (i = 0; i < gthumbs.length; i++)
+                        {
+                            var Objli = $('<li></li>');
+                            var ObjA = $('<a href="javascript:;;"></a>');
+                            var ObjImg = $('<img/>');
+
+                            ObjImg.addClass('related_photo');
+                            if(i==0){
+                                ObjImg.addClass('selected');
                             }
-                            K.attr("src", gthumbs[C]);
-                            K.attr("data-large", glarge[C]);
-                            K.css('height','100px');
-                            i.append(K);
-                            N.append(i);
-                            L.append(N)
+                            ObjImg.attr("src", gthumbs[i]);
+                            ObjImg.attr("data-large", glarge[i]);
+                            ObjA.append(ObjImg);
+                            Objli.append(ObjA);
+                            ObjUl.append(Objli);
                         }
-                        L.addClass("elastislide-list");
-                        L.elastislide();
-                        var M = $('<div class="elastislide-wrapper elastislide-horizontal"></div>');
-                        M.append(L).find(".related_photo").bind("click", function() {
-                            M.find(".selected").removeClass("selected");
-                            $(this).addClass("selected");
-                            $largePhoto = $(this).data("large");
+                        // ObjUl.addClass("og-grid-small");
+                        ObjUl.addClass("elastislide-list");
+                        ObjUl.elastislide();
+                        var carousel = $('<div class="elastislide-wrapper elastislide-horizontal"></div>');
+                        carousel.append(ObjUl).find('.related_photo').bind('click', function(){
+                            carousel.find('.selected').removeClass('selected');
+                            $(this).addClass('selected');
+                            $largePhoto = $(this).data('large');
 
                             /**********************Disable Image************************/
-                            
-                            // $("<img/>").load(function() {
-                            //     I.$fullimage.find("img").fadeOut(500, function() {
-                            //         $(this).fadeIn(500).attr("src", $largePhoto)
-                            //     })
-                            // }).attr("src", $largePhoto)
 
-                            /************************************************************/
+                            // $('<img/>').load(function(){
+                            //     self.$fullimage.find('img').fadeOut(500, function(){
+                            //         $(this).fadeIn(500).attr('src', $largePhoto);
+                            //     })
+                            // }).attr('src', $largePhoto);
+
+                            /***********************************************************/
 
                             $('.og-fullimg').fadeOut(100, function() {
-                                   $(this).fadeIn(500).html($largePhoto); // Inserting html
-                             });
+                                $(this).fadeIn(500).html($largePhoto);
+                            });
                         });
-                        
-                        I.$details.append('<div class="infosep"></div>');
-                        I.$details.append(M)
-                    } else {
-                        I.$details.find(".infosep, .og-grid-small").remove()
+                        self.$details.prepend('<div class="infosep"></div>');
+                        self.$details.prepend(carousel);
+                    }else{
+                        self.$details.find('.infosep, .og-grid-small').remove();
                     }
 
-                    /*******************************Loading Default************************/                    
 
-                    // if (I.$fullimage.is(":visible")) {
+                    /**********************LOADING DEFAULTS**********************/
+
+                    // preload large image and add it to the preview
+                    // for smaller screens we don´t display the large image (the media query will hide the fullimage wrapper)
+                    // if( self.$fullimage.is( ':visible' ) ) {
                     //     this.$loading.show();
-                    //     $("<img/>").load(function() {
-                    //         var P = $(this);
-                    //         if (P.attr("src") === I.$item.children("a").find("img").data("largesrc")) {
-                    //             I.$loading.hide();
-                    //             I.$fullimage.find("img").remove();
-                    //             I.$largeImg = P.fadeIn(350);
-                    //             I.$fullimage.append(I.$largeImg)                                
-                    //        }
-                    //     }).attr("src", eldata.large[0])
+                    //     $( '<img/>' ).load( function() {
+                    //         var $img = $( this );
+                    //         if( $img.attr( 'src' ) === self.$item.children('a').find('img').data( 'largesrc' ) ) {
+                    //             self.$loading.hide();
+                    //             self.$fullimage.find( 'img' ).remove();
+                    //             self.$largeImg = $img.fadeIn( 350 );
+                    //             self.$fullimage.append( self.$largeImg );
+                    //         }
+                    //     } ).attr( 'src', eldata.large[0] );
                     // }
-                    
-                    /*********************************************************************/
+
+                    /************************************************************/
 
                     $('.og-fullimg').html(eldata.large[0]);
+
                 }
-            }, open: function() {
-                setTimeout($.proxy(function() {
+            },
+            open : function() {
+
+                setTimeout( $.proxy( function() {
+                    // set the height for the preview and the item
                     this.setHeights();
-                    this.positionPreview()
-                }, this), 25)
-            }, close: function() {
-                var i = this, I = function() {
-                    if (s) {
-                        $(this).off(j)
+                    // scroll to position the preview in the right place
+                    this.positionPreview();
+                }, this ), 25 );
+
+            },
+            close : function() {
+
+                var self = this,
+                    onEndFn = function() {
+                        if( support ) {
+                            $( this ).off( transEndEventName );
+                        }
+                        self.$item.removeClass( 'og-expanded' );
+                        self.$previewEl.remove();
+                    };
+
+                setTimeout( $.proxy( function() {
+
+                    if( typeof this.$largeImg !== 'undefined' ) {
+                        this.$largeImg.fadeOut( 'fast' );
                     }
-                    i.$item.removeClass("og-expanded");
-                    i.$previewEl.remove()
-                };
-                setTimeout($.proxy(function() {
-                    if (typeof this.$largeImg !== "undefined") {
-                        this.$largeImg.fadeOut("fast")
+                    this.$previewEl.css( 'height', 0 );
+                    // the current expanded item (might be different from this.$item)
+                    var $expandedItem = $items.eq( this.expandedIdx );
+                    $expandedItem.css( 'height', $expandedItem.data( 'height' ) ).on( transEndEventName, onEndFn );
+
+                    if( !support ) {
+                        onEndFn.call();
                     }
-                    this.$previewEl.css("height", 0);
-                    var J = h.eq(this.expandedIdx);
-                    J.css("height", J.data("height")).on(j, I);
-                    if (!s) {
-                        I.call()
-                    }
-                }, this), 25);
-                return false
-            }, calcHeight: function() {
-                var I = d.height - this.$item.data("height") - q, i = d.height;
-                if (I < D.minHeight) {
-                    I = D.minHeight;
-                    i = D.minHeight + this.$item.data("height") + q
+
+                }, this ), 25 );
+
+                return false;
+
+            },
+            calcHeight : function() {
+
+                var heightPreview = winsize.height - this.$item.data( 'height' ) - marginExpanded,
+                    itemHeight = winsize.height;
+
+                //console.log(heightPreview);
+                if( heightPreview < settings.minHeight ) {
+                    heightPreview = settings.minHeight;
+                    itemHeight = settings.minHeight + this.$item.data( 'height' ) + marginExpanded;
                 }
-                this.height = I;
-                this.itemHeight = i
-            }, setHeights: function() {
-                var i = this, I = function() {
-                    if (s) {
-                        i.$item.off(j)
-                    }
-                    i.$item.addClass("og-expanded")
-                };
+                //console.log(heightPreview);
+                //console.log(this.$item.data( 'height' ));
+
+                this.height = heightPreview;
+                this.itemHeight = itemHeight;
+
+            },
+            setHeights : function() {
+
+                var self = this,
+                    onEndFn = function() {
+                        if( support ) {
+                            self.$item.off( transEndEventName );
+                        }
+                        self.$item.addClass( 'og-expanded' );
+                    };
+
                 this.calcHeight();
-                this.$previewEl.css("height", this.height);
-                this.$item.css("height", this.itemHeight).on(j, I);
-                if (!s) {
-                    I.call()
+                this.$previewEl.css( 'height', this.height );
+                this.$item.css( 'height', this.itemHeight ).on( transEndEventName, onEndFn );
+
+                if( !support ) {
+                    onEndFn.call();
                 }
-            }, positionPreview: function() {
-                var I = this.$item.data("offsetTop"), i = this.$previewEl.offset().top - F, J = this.height + this.$item.data("height") + q <= d.height ? I : this.height < d.height ? i - (d.height - this.height) : i;
-                A.animate({scrollTop: J}, D.speed)
-            }, setTransition: function() {
-                this.$previewEl.css("transition", "height " + D.speed + "ms " + D.easing);
-                this.$item.css("transition", "height " + D.speed + "ms " + D.easing)
-            }, getEl: function() {
-                return this.$previewEl
-            }};
-        k.imagesLoaded(function() {
-            r(true);
-            b();
-            n()
-        })
+
+            },
+            positionPreview : function() {
+
+                // scroll page
+                // case 1 : preview height + item height fits in window´s height
+                // case 2 : preview height + item height does not fit in window´s height and preview height is smaller than window´s height
+                // case 3 : preview height + item height does not fit in window´s height and preview height is bigger than window´s height
+                var position = this.$item.data( 'offsetTop' ),
+                    previewOffsetT = this.$previewEl.offset().top - scrollExtra,
+                    scrollVal = this.height + this.$item.data( 'height' ) + marginExpanded <= winsize.height ? position : this.height < winsize.height ? previewOffsetT - ( winsize.height - this.height ) : previewOffsetT;
+
+                $body.animate( { scrollTop : scrollVal }, settings.speed );
+
+            },
+            setTransition  : function() {
+                this.$previewEl.css( 'transition', 'height ' + settings.speed + 'ms ' + settings.easing );
+                this.$item.css( 'transition', 'height ' + settings.speed + 'ms ' + settings.easing );
+            },
+            getEl : function() {
+                return this.$previewEl;
+            }
+        }
+
+        // return {
+        //     init : init,
+        //     addItems : addItems
+        // };
+        $grid.imagesLoaded( function() {
+
+            // save item´s size and offset
+            saveItemInfo( true );
+            // get window´s size
+            getWinSize();
+            // initialize some events
+            initEvents();
+
+        } );
+
     }
-});
-(function(c, b, d) {
-    c.HoverDir = function(e, f) {
-        this.$el = c(f);
-        this._init(e)
-    };
-    c.HoverDir.defaults = {speed: 300, easing: "ease", hoverDelay: 0, inverse: false};
-    c.HoverDir.prototype = {_init: function(e) {
-            this.options = c.extend(true, {}, c.HoverDir.defaults, e);
-            this.transitionProp = "all " + this.options.speed + "ms " + this.options.easing;
-            this.support = Modernizr.csstransitions;
-            this._loadEvents()
-        }, _loadEvents: function() {
-            var e = this;
-            this.$el.on("mouseenter.hoverdir, mouseleave.hoverdir", function(i) {
-                var g = c(this), f = g.find("figure"), j = e._getDir(g, {x: i.pageX, y: i.pageY}), h = e._getStyle(j);
-                if (i.type === "mouseenter") {
-                    f.hide().css(h.from);
-                    clearTimeout(e.tmhover);
-                    e.tmhover = setTimeout(function() {
-                        f.show(0, function() {
-                            var k = c(this);
-                            if (e.support) {
-                                k.css("transition", e.transitionProp)
-                            }
-                            e._applyAnimation(k, h.to, e.options.speed)
-                        })
-                    }, e.options.hoverDelay)
-                } else {
-                    if (e.support) {
-                        f.css("transition", e.transitionProp)
-                    }
-                    clearTimeout(e.tmhover);
-                    e._applyAnimation(f, h.from, e.options.speed)
-                }
-            })
-        }, _getDir: function(g, k) {
-            var f = g.width(), i = g.height(), e = (k.x - g.offset().left - (f / 2)) * (f > i ? (i / f) : 1), l = (k.y - g.offset().top - (i / 2)) * (i > f ? (f / i) : 1), j = Math.round((((Math.atan2(l, e) * (180 / Math.PI)) + 180) / 90) + 3) % 4;
-            return j
-        }, _getStyle: function(k) {
-            var g, l, i = {left: "0px", top: "-100%"}, e = {left: "0px", top: "100%"}, h = {left: "-100%", top: "0px"}, f = {left: "100%", top: "0px"}, m = {top: "0px"}, j = {left: "0px"};
-            switch (k) {
-                case 0:
-                    g = !this.options.inverse ? i : e;
-                    l = m;
-                    break;
-                case 1:
-                    g = !this.options.inverse ? f : h;
-                    l = j;
-                    break;
-                case 2:
-                    g = !this.options.inverse ? e : i;
-                    l = m;
-                    break;
-                case 3:
-                    g = !this.options.inverse ? h : f;
-                    l = j;
-                    break
-            }
-            return{from: g, to: l}
-        }, _applyAnimation: function(f, e, g) {
-            c.fn.applyStyle = this.support ? c.fn.css : c.fn.animate;
-            f.stop().applyStyle(e, c.extend(true, [], {duration: g + "ms"}))
-        }};
-    var a = function(e) {
-        if (b.console) {
-            b.console.error(e)
-        }
-    };
-    c.fn.hoverdir = function(g) {
-        var e = c.data(this, "hoverdir");
-        if (typeof g === "string") {
-            var f = Array.prototype.slice.call(arguments, 1);
-            this.each(function() {
-                if (!e) {
-                    a("cannot call methods on hoverdir prior to initialization; attempted to call method '" + g + "'");
-                    return
-                }
-                if (!c.isFunction(e[g]) || g.charAt(0) === "_") {
-                    a("no such method '" + g + "' for hoverdir instance");
-                    return
-                }
-                e[g].apply(e, f)
-            })
-        } else {
-            this.each(function() {
-                if (e) {
-                    e._init()
-                } else {
-                    e = c.data(this, "hoverdir", new c.HoverDir(g, this))
-                }
-            })
-        }
-        return e
-    }
-})(jQuery, window);
-(function(g, h, e) {
-    var a = g.event, b, j;
-    b = a.special.debouncedresize = {setup: function() {
-            g(this).on("resize", b.handler)
-        }, teardown: function() {
-            g(this).off("resize", b.handler)
-        }, handler: function(o, k) {
-            var n = this, m = arguments, l = function() {
-                o.type = "debouncedresize";
-                a.dispatch.apply(n, m)
-            };
-            if (j) {
-                clearTimeout(j)
-            }
-            k ? l() : j = setTimeout(l, b.threshold)
-        }, threshold: 150};
-    var c = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
-    g.fn.imagesLoaded = function(r) {
-        var o = this, t = g.isFunction(g.Deferred) ? g.Deferred() : 0, s = g.isFunction(t.notify), l = o.find("img").add(o.filter("img")), m = [], q = [], n = [];
-        if (g.isPlainObject(r)) {
-            g.each(r, function(u, v) {
-                if (u === "callback") {
-                    r = v
-                } else {
-                    if (t) {
-                        t[u](v)
-                    }
-                }
-            })
-        }
-        function p() {
-            var u = g(q), v = g(n);
-            if (t) {
-                if (n.length) {
-                    t.reject(l, u, v)
-                } else {
-                    t.resolve(l)
-                }
-            }
-            if (g.isFunction(r)) {
-                r.call(o, l, u, v)
-            }
-        }
-        function k(u, v) {
-            if (u.src === c || g.inArray(u, m) !== -1) {
-                return
-            }
-            m.push(u);
-            if (v) {
-                n.push(u)
-            } else {
-                q.push(u)
-            }
-            g.data(u, "imagesLoaded", {isBroken: v, src: u.src});
-            if (s) {
-                t.notifyWith(g(u), [v, l, g(q), g(n)])
-            }
-            if (l.length === m.length) {
-                setTimeout(p);
-                l.unbind(".imagesLoaded")
-            }
-        }
-        if (!l.length) {
-            p()
-        } else {
-            l.bind("load.imagesLoaded error.imagesLoaded", function(u) {
-                k(u.target, u.type === "error")
-            }).each(function(u, w) {
-                var x = w.src;
-                var v = g.data(w, "imagesLoaded");
-                if (v && v.src === x) {
-                    k(w, v.isBroken);
-                    return
-                }
-                if (w.complete && w.naturalWidth !== e) {
-                    k(w, w.naturalWidth === 0 || w.naturalHeight === 0);
-                    return
-                }
-                if (w.readyState || w.complete) {
-                    w.src = c;
-                    w.src = x
-                }
-            })
-        }
-        return t ? t.promise(o) : o
-    };
-    var d = g(h), f = h.Modernizr;
-    g.Elastislide = function(k, l) {
-        this.$el = g(l);
-        this._init(k)
-    };
-    g.Elastislide.defaults = {orientation: "horizontal", speed: 500, easing: "ease-in-out", minItems: 3, start: 0, onClick: function(m, k, l) {
-            return false
-        }, onReady: function() {
-            return false
-        }, onBeforeSlide: function() {
-            return false
-        }, onAfterSlide: function() {
-            return false
-        }};
-    g.Elastislide.prototype = {_init: function(l) {
-            this.options = g.extend(true, {}, g.Elastislide.defaults, l);
-            var k = this, m = {WebkitTransition: "webkitTransitionEnd", MozTransition: "transitionend", OTransition: "oTransitionEnd", msTransition: "MSTransitionEnd", transition: "transitionend"};
-            this.transEndEventName = m[f.prefixed("transition")];
-            this.support = f.csstransitions && f.csstransforms;
-            this.current = this.options.start;
-            this.isSliding = false;
-            this.$items = this.$el.children("li");
-            this.itemsCount = this.$items.length;
-            if (this.itemsCount === 0) {
-                return false
-            }
-            this._validate();
-            this.$items.detach();
-            this.$el.empty();
-            this.$el.append(this.$items);
-            this.$el.wrap('<div class="elastislide-wrapper elastislide-loading elastislide-' + this.options.orientation + '"></div>');
-            this.hasTransition = false;
-            this.hasTransitionTimeout = setTimeout(function() {
-                k._addTransition()
-            }, 100);
-            this.$el.imagesLoaded(function() {
-                k.$el.show();
-                k._layout();
-                k._configure();
-                if (k.hasTransition) {
-                    k._removeTransition();
-                    k._slideToItem(k.current);
-                    k.$el.on(k.transEndEventName, function() {
-                        k.$el.off(k.transEndEventName);
-                        k._setWrapperSize();
-                        k._addTransition();
-                        k._initEvents()
-                    })
-                } else {
-                    clearTimeout(k.hasTransitionTimeout);
-                    k._setWrapperSize();
-                    k._initEvents();
-                    k._slideToItem(k.current);
-                    setTimeout(function() {
-                        k._addTransition()
-                    }, 25)
-                }
-                k.options.onReady()
-            })
-        }, _validate: function() {
-            if (this.options.speed < 0) {
-                this.options.speed = 500
-            }
-            if (this.options.minItems < 1 || this.options.minItems > this.itemsCount) {
-                this.options.minItems = 1
-            }
-            if (this.options.start < 0 || this.options.start > this.itemsCount - 1) {
-                this.options.start = 0
-            }
-            if (this.options.orientation != "horizontal" && this.options.orientation != "vertical") {
-                this.options.orientation = "horizontal"
-            }
-        }, _layout: function() {
-            this.$el.wrap('<div class="elastislide-carousel"></div>');
-            this.$carousel = this.$el.parent();
-            this.$wrapper = this.$carousel.parent().removeClass("elastislide-loading");
-            var k = this.$items.find("img:first");
-            this.imgSize = {width: k.outerWidth(true), height: k.outerHeight(true)};
-            this._setItemsSize();
-            this.options.orientation === "horizontal" ? this.$el.css("max-height", this.imgSize.height) : this.$el.css("height", this.options.minItems * this.imgSize.height);
-            this._addControls()
-        }, _addTransition: function() {
-            if (this.support) {
-                this.$el.css("transition", "all " + this.options.speed + "ms " + this.options.easing)
-            }
-            this.hasTransition = true
-        }, _removeTransition: function() {
-            if (this.support) {
-                this.$el.css("transition", "all 0s")
-            }
-            this.hasTransition = false
-        }, _addControls: function() {
-            var k = this;
-            this.$navigation = g('<nav><span class="elastislide-prev">Previous</span><span class="elastislide-next">Next</span></nav>').appendTo(this.$wrapper);
-            this.$navPrev = this.$navigation.find("span.elastislide-prev").on("mousedown.elastislide", function(l) {
-                k._slide("prev");
-                return false
-            });
-            this.$navNext = this.$navigation.find("span.elastislide-next").on("mousedown.elastislide", function(l) {
-                k._slide("next");
-                return false
-            })
-        }, _setItemsSize: function() {
-            var k = this.options.orientation === "horizontal" ? (Math.floor(this.$carousel.width() / this.options.minItems) * 100) / this.$carousel.width() : 100;
-            this.$items.css({width: k + "%", "max-width": this.imgSize.width, "max-height": this.imgSize.height});
-            if (this.options.orientation === "vertical") {
-                this.$wrapper.css("max-width", this.imgSize.width + parseInt(this.$wrapper.css("padding-left")) + parseInt(this.$wrapper.css("padding-right")))
-            }
-        }, _setWrapperSize: function() {
-            if (this.options.orientation === "vertical") {
-                this.$wrapper.css({height: this.options.minItems * this.imgSize.height + parseInt(this.$wrapper.css("padding-top")) + parseInt(this.$wrapper.css("padding-bottom"))})
-            }
-        }, _configure: function() {
-            this.fitCount = this.options.orientation === "horizontal" ? this.$carousel.width() < this.options.minItems * this.imgSize.width ? this.options.minItems : Math.floor(this.$carousel.width() / this.imgSize.width) : this.$carousel.height() < this.options.minItems * this.imgSize.height ? this.options.minItems : Math.floor(this.$carousel.height() / this.imgSize.height)
-        }, _initEvents: function() {
-            var k = this;
-            d.on("debouncedresize.elastislide", function() {
-                k._setItemsSize();
-                k._configure();
-                k._slideToItem(k.current)
-            });
-            this.$el.on(this.transEndEventName, function() {
-                k._onEndTransition()
-            });
-            if (this.options.orientation === "horizontal") {
-                this.$el.on({swipeleft: function() {
-                        k._slide("next")
-                    }, swiperight: function() {
-                        k._slide("prev")
-                    }})
-            } else {
-                this.$el.on({swipeup: function() {
-                        k._slide("next")
-                    }, swipedown: function() {
-                        k._slide("prev")
-                    }})
-            }
-            this.$el.on("click.elastislide", "li", function(m) {
-                var l = g(this);
-                k.options.onClick(l, l.index(), m)
-            })
-        }, _destroy: function(k) {
-            this.$el.off(this.transEndEventName).off("swipeleft swiperight swipeup swipedown .elastislide");
-            d.off(".elastislide");
-            this.$el.css({"max-height": "none", transition: "none"}).unwrap(this.$carousel).unwrap(this.$wrapper);
-            this.$items.css({width: "auto", "max-width": "none", "max-height": "none"});
-            this.$navigation.remove();
-            this.$wrapper.remove();
-            if (k) {
-                k.call()
-            }
-        }, _toggleControls: function(k, l) {
-            if (l) {
-                (k === "next") ? this.$navNext.show() : this.$navPrev.show()
-            } else {
-                (k === "next") ? this.$navNext.hide() : this.$navPrev.hide()
-            }
-        }, _slide: function(l, n) {
-            if (this.isSliding) {
-                return false
-            }
-            this.options.onBeforeSlide();
-            this.isSliding = true;
-            var t = this, k = this.translation || 0, q = this.options.orientation === "horizontal" ? this.$items.outerWidth(true) : this.$items.outerHeight(true), o = this.itemsCount * q, m = this.options.orientation === "horizontal" ? this.$carousel.width() : this.$carousel.height();
-            if (n === e) {
-                var p = this.fitCount * q;
-                if (p < 0) {
-                    return false
-                }
-                if (l === "next" && o - (Math.abs(k) + p) < m) {
-                    p = o - (Math.abs(k) + m);
-                    this._toggleControls("next", false);
-                    this._toggleControls("prev", true)
-                } else {
-                    if (l === "prev" && Math.abs(k) - p < 0) {
-                        p = Math.abs(k);
-                        this._toggleControls("next", true);
-                        this._toggleControls("prev", false)
-                    } else {
-                        var s = l === "next" ? Math.abs(k) + Math.abs(p) : Math.abs(k) - Math.abs(p);
-                        s > 0 ? this._toggleControls("prev", true) : this._toggleControls("prev", false);
-                        s < o - m ? this._toggleControls("next", true) : this._toggleControls("next", false)
-                    }
-                }
-                n = l === "next" ? k - p : k + p
-            } else {
-                var p = Math.abs(n);
-                if (Math.max(o, m) - p < m) {
-                    n = -(Math.max(o, m) - m)
-                }
-                p > 0 ? this._toggleControls("prev", true) : this._toggleControls("prev", false);
-                Math.max(o, m) - m > p ? this._toggleControls("next", true) : this._toggleControls("next", false)
-            }
-            this.translation = n;
-            if (k === n) {
-                this._onEndTransition();
-                return false
-            }
-            if (this.support) {
-                this.options.orientation === "horizontal" ? this.$el.css("transform", "translateX(" + n + "px)") : this.$el.css("transform", "translateY(" + n + "px)")
-            } else {
-                g.fn.applyStyle = this.hasTransition ? g.fn.animate : g.fn.css;
-                var r = this.options.orientation === "horizontal" ? {left: n} : {top: n};
-                this.$el.stop().applyStyle(r, g.extend(true, [], {duration: this.options.speed, complete: function() {
-                        t._onEndTransition()
-                    }}))
-            }
-            if (!this.hasTransition) {
-                this._onEndTransition()
-            }
-        }, _onEndTransition: function() {
-            this.isSliding = false;
-            this.options.onAfterSlide()
-        }, _slideTo: function(o) {
-            var o = o || this.current, n = Math.abs(this.translation) || 0, m = this.options.orientation === "horizontal" ? this.$items.outerWidth(true) : this.$items.outerHeight(true), l = n + this.$carousel.width(), k = Math.abs(o * m);
-            if (k + m > l || k < n) {
-                this._slideToItem(o)
-            }
-        }, _slideToItem: function(l) {
-            var k = this.options.orientation === "horizontal" ? l * this.$items.outerWidth(true) : l * this.$items.outerHeight(true);
-            this._slide("", -k)
-        }, add: function(n) {
-            var k = this, m = this.current, l = this.$items.eq(this.current);
-            this.$items = this.$el.children("li");
-            this.itemsCount = this.$items.length;
-            this.current = l.index();
-            this._setItemsSize();
-            this._configure();
-            this._removeTransition();
-            m < this.current ? this._slideToItem(this.current) : this._slide("next", this.translation);
-            setTimeout(function() {
-                k._addTransition()
-            }, 25);
-            if (n) {
-                n.call()
-            }
-        }, setCurrent: function(k, l) {
-            this.current = k;
-            this._slideTo();
-            if (l) {
-                l.call()
-            }
-        }, next: function() {
-            self._slide("next")
-        }, previous: function() {
-            self._slide("prev")
-        }, slideStart: function() {
-            this._slideTo(0)
-        }, slideEnd: function() {
-            this._slideTo(this.itemsCount - 1)
-        }, destroy: function(k) {
-            this._destroy(k)
-        }};
-    var i = function(k) {
-        if (h.console) {
-            h.console.error(k)
-        }
-    };
-    g.fn.elastislide = function(m) {
-        var k = g.data(this, "elastislide");
-        if (typeof m === "string") {
-            var l = Array.prototype.slice.call(arguments, 1);
-            this.each(function() {
-                if (!k) {
-                    i("cannot call methods on elastislide prior to initialization; attempted to call method '" + m + "'");
-                    return
-                }
-                if (!g.isFunction(k[m]) || m.charAt(0) === "_") {
-                    i("no such method '" + m + "' for elastislide self");
-                    return
-                }
-                k[m].apply(k, l)
-            })
-        } else {
-            this.each(function() {
-                if (k) {
-                    k._init()
-                } else {
-                    k = g.data(this, "elastislide", new g.Elastislide(m, this))
-                }
-            })
-        }
-        return k
-    }
-})(jQuery, window);
+})
