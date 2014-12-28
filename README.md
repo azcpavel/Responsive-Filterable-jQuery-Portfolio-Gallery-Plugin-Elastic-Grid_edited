@@ -2,11 +2,15 @@ Responsive-Filterable-jQuery-Portfolio-Gallery-Plugin-Elastic-Grid_edited
 =========================================================================
 
 Loading html instead of image with random fx
-
+enable navigation
+added after onclick options
 
 Just use elastic_grid_edited.js & load with this function
 
 Note: try to keep your thumb img height to 100px
+
+<script src="js/jquery.hoverdir.js"></script>
+<script src="js/jquery.elastislide.js"> </script>
 
 
 ```
@@ -20,6 +24,14 @@ $(function(){
             'hoverInverse': false,
             'expandingSpeed': 500,
             'expandingHeight': 570,
+            exHideInfoBoxTitle: false, // Added New Variable For Hiding Title in infobox 
+            exControls: false, // Added new variable for control flag
+            exControlsCSS : {position:'absolute', cursor:'pointer', padding : 5, marginTop : '15%'}, // Added new variable for control css
+            exControlsNextText : 'Next', // Added new variable for control next text
+            exControlsNextClass : null, // Added new variable for control next class
+            exControlsPrevText : 'Prev', // Added new variable for control prev text
+            exControlsPrevClass : null, // Added new variable for control prev class
+            exOnClickEvent: function() { console.log('Test')}, // Added New Variable For After Click Action
             'items' :
             [
                 {
