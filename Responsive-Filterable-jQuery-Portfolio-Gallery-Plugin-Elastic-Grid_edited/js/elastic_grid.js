@@ -1,14 +1,3 @@
-/*  
-*   @author vukhanhtruong
-*   @edited by Ahsan Zahid Chowdhury <azc.pavel@gmail.com>
-*   @date 2014-09-17
-*   loading html instead of image
-*   added hideInfoBox config for hide title in infobox    
-*   added onClickEvent config for exec after click on figure
-*   added navigation config & options
-*   
-*/
-
 /*
 * debouncedresize: special jQuery event that happens once after a window resize
 *
@@ -191,16 +180,8 @@ $(function() {
             hoverInverse: false,
             expandingHeight: 500,
             expandingSpeed: 300,
-            exHideInfoBoxTitle: false, // Added New Variable For Hiding Title in infobox 
-            exControls: false, // Added new variable for control flag
-            exControlsCSS : {position:'absolute', cursor:'pointer', padding : 5, marginTop : '15%'}, // Added new variable for control css
-            exControlsNextText : 'Next', // Added new variable for control next text
-            exControlsNextClass : null, // Added new variable for control next class
-            exControlsPrevText : 'Prev', // Added new variable for control prev text
-            exControlsPrevClass : null, // Added new variable for control prev class
-            exOnClickEvent: function() {}, // Added New Variable For After Click Action
             callback: function() {}
-        }, config);                        
+        }, config);
 
         // initial container object
         var container = $(this);
@@ -233,8 +214,8 @@ $(function() {
                 liObject.attr('data-tags', strTag);
 
                 //initial a object
-                aObject = $('<a></a>'); // Added Class for exec event
-                aObject.attr('href', 'javascript:;;');                
+                aObject = $('<a></a>');
+                aObject.attr('href', 'javascript:;;');
 
                 //initial default photo
                 imgObject = $('<img/>');
@@ -458,8 +439,7 @@ $(function() {
                 previewPos = -1;
                 // save item´s offset
                 saveItemInfo();
-                getWinSize();                
-
+                getWinSize();
                 var preview = $.data( this, 'preview' );
                 if( typeof preview != 'undefined' ) {
                     hidePreview();
@@ -550,42 +530,11 @@ $(function() {
             this.expandedIdx = this.$item.index();
             this.create();
             this.update();
-            config.exOnClickEvent();
         }
 
         Preview.prototype = {
             create : function() {
                 // create Preview structure:
-
-                /**************************************************************************/
-                // Adding element and event for navigation
-                
-                if(config.exControls == true){
-                    
-                    this.$itemNext = $('<span>'+config.exControlsNextText+'</span>');
-                    this.$itemNext.css({right:0});
-                    if(config.exControlsCSS != null)
-                        this.$itemNext.css(config.exControlsCSS);                    
-                    if(config.exControlsNextClass != null)
-                        this.$itemNext.addClass(config.exControlsNextClass);                    
-                    this.$itemNext.click(function(){
-                        showPreview($(this).parent().parent().parent().next());                                       
-                    });
-
-                    this.$itemPrev = $('<span>'+config.exControlsPrevText+'</span>');
-                    this.$itemPrev.css({left:0});                    
-                    if(config.exControlsCSS != null)
-                        this.$itemPrev.css(config.exControlsCSS);
-                    if(config.exControlsPrevClass != null)
-                        this.$itemPrev.addClass(config.exControlsPrevClass);                                        
-                    this.$itemPrev.click(function(){
-                        showPreview($(this).parent().parent().parent().prev());                                       
-                    });
-                }
-
-                /**************************************************************************/
-
-
                 this.$title = $( '<h3></h3>' );
                 this.$description = $( '<p></p>' );
                 this.$href = $( '<a href="#">Visit website</a>' );
@@ -593,13 +542,12 @@ $(function() {
                 this.$details = $( '<div class="og-details"></div>' ).append( this.$title, this.$description, this.$detailButtonList );
                 this.$loading = $( '<div class="og-loading"></div>' );
                 this.$fullimage = $( '<div class="og-fullimg"></div>' ).append( this.$loading );
-                this.$closePreview = $( '<span class="og-close"></span>' );                
-                this.$previewInner = $( '<div class="og-expander-inner"></div>' ).append( this.$itemNext, this.$itemPrev, this.$closePreview, this.$fullimage, this.$details );
+                this.$closePreview = $( '<span class="og-close"></span>' );
+                this.$previewInner = $( '<div class="og-expander-inner"></div>' ).append( this.$closePreview, this.$fullimage, this.$details );
                 this.$previewEl = $( '<div class="og-expander"></div>' ).append( this.$previewInner );
-
                 // append preview element to the item
                 this.$item.append( $('<div class="og-pointer"></div>') );
-                this.$item.append( this.getEl() );                
+                this.$item.append( this.getEl() );
 
                 // set the transitions for the preview and the item
                 if( support ) {
@@ -631,9 +579,7 @@ $(function() {
                 }else{
                     eldata = config.items[current];
 
-                    if(config.exHideInfoBoxTitle == false) //Checking Config
                     this.$title.html( eldata.title );
-
                     this.$description.html( eldata.description );
                     //clear current button list
                     this.$detailButtonList.html("");
@@ -692,47 +638,33 @@ $(function() {
                             $(this).addClass('selected');
                             $largePhoto = $(this).data('large');
 
-                            /**********************Disable Image************************/
-
-                            // $('<img/>').load(function(){
-                            //     self.$fullimage.find('img').fadeOut(500, function(){
-                            //         $(this).fadeIn(500).attr('src', $largePhoto);
-                            //     })
-                            // }).attr('src', $largePhoto);
-
-                            /***********************************************************/
-
-                            $('.og-fullimg').fadeOut(100, function() {
-                                $(this).fadeIn(500).html($largePhoto);
-                            });
+                            $('<img/>').load(function(){
+                                self.$fullimage.find('img').fadeOut(500, function(){
+                                    $(this).fadeIn(500).attr('src', $largePhoto);
+                                })
+                            }).attr('src', $largePhoto);
                         });
-                        self.$details.prepend('<div class="infosep"></div>');
-                        self.$details.prepend(carousel);
+                        self.$details.append('<div class="infosep"></div>');
+                        self.$details.append(carousel);
                     }else{
                         self.$details.find('.infosep, .og-grid-small').remove();
                     }
 
 
-                    /**********************LOADING DEFAULTS**********************/
-
                     // preload large image and add it to the preview
                     // for smaller screens we don´t display the large image (the media query will hide the fullimage wrapper)
-                    // if( self.$fullimage.is( ':visible' ) ) {
-                    //     this.$loading.show();
-                    //     $( '<img/>' ).load( function() {
-                    //         var $img = $( this );
-                    //         if( $img.attr( 'src' ) === self.$item.children('a').find('img').data( 'largesrc' ) ) {
-                    //             self.$loading.hide();
-                    //             self.$fullimage.find( 'img' ).remove();
-                    //             self.$largeImg = $img.fadeIn( 350 );
-                    //             self.$fullimage.append( self.$largeImg );
-                    //         }
-                    //     } ).attr( 'src', eldata.large[0] );
-                    // }
-
-                    /************************************************************/
-
-                    $('.og-fullimg').html(eldata.large[0]);
+                    if( self.$fullimage.is( ':visible' ) ) {
+                        this.$loading.show();
+                        $( '<img/>' ).load( function() {
+                            var $img = $( this );
+                            if( $img.attr( 'src' ) === self.$item.children('a').find('img').data( 'largesrc' ) ) {
+                                self.$loading.hide();
+                                self.$fullimage.find( 'img' ).remove();
+                                self.$largeImg = $img.fadeIn( 350 );
+                                self.$fullimage.append( self.$largeImg );
+                            }
+                        } ).attr( 'src', eldata.large[0] );
+                    }
 
                 }
             },
