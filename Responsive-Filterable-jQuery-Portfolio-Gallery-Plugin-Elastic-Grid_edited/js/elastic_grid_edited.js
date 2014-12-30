@@ -569,7 +569,43 @@ $(function() {
                     if(config.exControlsNextClass != null)
                         this.$itemNext.addClass(config.exControlsNextClass);                    
                     this.$itemNext.click(function(){
-                        showPreview($(this).parent().parent().parent().next());                                       
+                        var parentUl = $(this).parent().parent().parent().parent().children();
+                        parentUl.find('figure').css('top','100%');
+                        var currChild = $(this).parent().parent().parent();
+                        var currChildDataType = currChild.data('tags');
+                        var currentChieldIndex = currChild.index();                        
+                        //console.log(currChildDataType);
+                        var jc=[];
+                        for (var i = 0; i < parentUl.length; i++) {
+                            // console.log(parentUl.eq(i).data('tags').search(currChildDataType));
+                            if(currChildDataType.indexOf(',') >= 0)                                          
+                            {
+                                var chArray = currChildDataType.split(',');                                
+                                
+                                for (var j = 0; j < chArray.length; j++) {                                    
+                                    if(parentUl.eq(i).data('tags').indexOf(chArray[j]) >= 0)
+                                    {                                                                      
+                                        if($.inArray(i,jc) < 0)
+                                        {
+                                            //console.log(i,parentUl.eq(i));
+                                            jc.push(i);
+                                        }
+                                    }
+                                };
+                            }
+                            else{
+
+                                if(parentUl.eq(i).data('tags').indexOf(currChildDataType) >= 0)
+                                    {                                                                      
+                                        //console.log(i,parentUl.eq(i));
+                                        jc.push(i);
+                                    }
+                            }                            
+                        };
+                        // parentUllength = jc;
+                        //console.log(jc,jc[$.inArray(currentChieldIndex,jc) + 1]);
+                        
+                        showPreview(parentUl.eq(jc[$.inArray(currentChieldIndex,jc) + 1]));                                       
                     });
 
                     this.$itemPrev = $('<span>'+config.exControlsPrevText+'</span>');
@@ -579,7 +615,43 @@ $(function() {
                     if(config.exControlsPrevClass != null)
                         this.$itemPrev.addClass(config.exControlsPrevClass);                                        
                     this.$itemPrev.click(function(){
-                        showPreview($(this).parent().parent().parent().prev());                                       
+                        var parentUl = $(this).parent().parent().parent().parent().children();
+                        parentUl.find('figure').css('top','100%');
+                        var currChild = $(this).parent().parent().parent();
+                        var currChildDataType = currChild.data('tags');
+                        var currentChieldIndex = currChild.index();                        
+                        //console.log(currChildDataType);
+                        var jc=[];
+                        for (var i = 0; i < parentUl.length; i++) {
+                            // console.log(parentUl.eq(i).data('tags').search(currChildDataType));
+                            if(currChildDataType.indexOf(',') >= 0)                                          
+                            {
+                                var chArray = currChildDataType.split(',');                                
+                                
+                                for (var j = 0; j < chArray.length; j++) {                                    
+                                    if(parentUl.eq(i).data('tags').indexOf(chArray[j]) >= 0)
+                                    {                                                                      
+                                        if($.inArray(i,jc) < 0)
+                                        {
+                                            //console.log(i,parentUl.eq(i));
+                                            jc.push(i);
+                                        }
+                                    }
+                                };
+                            }
+                            else{
+
+                                if(parentUl.eq(i).data('tags').indexOf(currChildDataType) >= 0)
+                                    {                                                                      
+                                        //console.log(i,parentUl.eq(i));
+                                        jc.push(i);
+                                    }
+                            }                            
+                        };
+                        // parentUllength = jc;
+                        //console.log(jc,jc[$.inArray(currentChieldIndex,jc) + 1]);
+                        
+                        showPreview(parentUl.eq(jc[$.inArray(currentChieldIndex,jc) - 1]));                                       
                     });
                 }
 
