@@ -16,24 +16,16 @@ Note: try to keep your thumb img height to 100px
 <script src="js/jquery.hoverdir.js"></script>
 <script src="js/jquery.elastislide.js"> </script>
 
-$(function(){
-        var fxrand = Math.floor((Math.random() * 5) + 1);
-        var fx = ['fallperspective', 'fly', 'flip', 'helix' , 'popup'];
+$(function(){        
         $("#elastic_grid").elastic_grid({
-            'filterEffect': fx[fxrand], // moveup, scaleup, fallperspective, fly, flip, helix , popup
-            'hoverDirection': true,
-            'hoverDelay': 0,
-            'hoverInverse': false,
-            'expandingSpeed': 500,
-            'expandingHeight': 570,
-            exHideInfoBoxTitle: false, // Added New Variable For Hiding Title in infobox 
-            exControls: false, // Added new variable for control flag
-            exControlsCSS : {position:'absolute', cursor:'pointer', padding : 5, marginTop : '15%'}, // Added new variable for control css
-            exControlsNextText : 'Next', // Added new variable for control next text
-            exControlsNextClass : null, // Added new variable for control next class
-            exControlsPrevText : 'Prev', // Added new variable for control prev text
-            exControlsPrevClass : null, // Added new variable for control prev class
-            exOnClickEvent: function() { console.log('Test')}, // Added New Variable For After Click Action
+            filterEffect: 'random', // moveup, scaleup, fallperspective, fly, flip, helix, popup, random
+            hoverDirection: true,
+            hoverDelay: 0,
+            hoverInverse': false,
+            expandingSpeed: 500,
+            expandingHeight: 570,
+            exHideInfoBoxTitle: true,
+            exControls: true,             
             'items' :
             [
                 {
