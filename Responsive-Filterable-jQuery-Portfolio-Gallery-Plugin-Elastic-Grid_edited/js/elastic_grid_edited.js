@@ -580,7 +580,8 @@ $(function() {
 
                         if($('#portfolio-filter').find('li[class=current]').children().data('filter') == '.all')
                         {
-                            showPreview($(this).parent().parent().parent().next());
+                            if($(this).parent().parent().parent().next().length != 0)
+                                showPreview($(this).parent().parent().parent().next());
                             return;
                         }                        
                         //console.log(currChildDataType);
@@ -635,7 +636,8 @@ $(function() {
 
                         if($('#portfolio-filter').find('li[class=current]').children().data('filter') == '.all')
                         {
-                            showPreview($(this).parent().parent().parent().prev());
+                            if($(this).parent().parent().parent().prev().length != 0)
+                                showPreview($(this).parent().parent().parent().prev());
                             return;
                         }                        
                         //console.log(currChildDataType);
