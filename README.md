@@ -7,6 +7,8 @@ added after onclick options
 
 Just use elastic_grid_edited.js & load with this function
 
+No need to add jquery.hoverdir.js and jquery.elastislide.js if you use elastic_grid_edited.min.js
+
 Note: try to keep your thumb img height to 100px
 
 
