@@ -472,6 +472,7 @@ $(function() {
         function initItemsEvents( $items ) {
             $items.on( 'click', 'span.og-close', function() {
                 hidePreview();
+                $items.children().find('figure').css('top','100%');
                 return false;
             } ).children( 'a' ).on( 'click', function(e) {
                 var $item = $( this ).parent();
@@ -568,12 +569,19 @@ $(function() {
                         this.$itemNext.css(config.exControlsCSS);                    
                     if(config.exControlsNextClass != null)
                         this.$itemNext.addClass(config.exControlsNextClass);                    
-                    this.$itemNext.click(function(){
+                    this.$itemNext.click(function(){                        
+
                         var parentUl = $(this).parent().parent().parent().parent().children();
                         parentUl.find('figure').css('top','100%');
                         var currChild = $(this).parent().parent().parent();
                         var currChildDataType = currChild.data('tags');
-                        var currentChieldIndex = currChild.index();                        
+                        var currentChieldIndex = currChild.index();
+
+                        if($('#portfolio-filter').find('li[class=current]').children().data('filter') == '.all')
+                        {
+                            showPreview($(this).parent().parent().parent().next());
+                            return;
+                        }                        
                         //console.log(currChildDataType);
                         var jc=[];
                         for (var i = 0; i < parentUl.length; i++) {
@@ -604,8 +612,9 @@ $(function() {
                         };
                         // parentUllength = jc;
                         //console.log(jc,jc[$.inArray(currentChieldIndex,jc) + 1]);
-                        
-                        showPreview(parentUl.eq(jc[$.inArray(currentChieldIndex,jc) + 1]));                                       
+                        parentUl.removeClass('animate');
+                        if(jc.length > 1)
+                            showPreview(parentUl.eq(jc[$.inArray(currentChieldIndex,jc) + 1]));                                       
                     });
 
                     this.$itemPrev = $('<span>'+config.exControlsPrevText+'</span>');
@@ -615,11 +624,18 @@ $(function() {
                     if(config.exControlsPrevClass != null)
                         this.$itemPrev.addClass(config.exControlsPrevClass);                                        
                     this.$itemPrev.click(function(){
+                                                
                         var parentUl = $(this).parent().parent().parent().parent().children();
                         parentUl.find('figure').css('top','100%');
                         var currChild = $(this).parent().parent().parent();
                         var currChildDataType = currChild.data('tags');
-                        var currentChieldIndex = currChild.index();                        
+                        var currentChieldIndex = currChild.index();
+
+                        if($('#portfolio-filter').find('li[class=current]').children().data('filter') == '.all')
+                        {
+                            showPreview($(this).parent().parent().parent().prev());
+                            return;
+                        }                        
                         //console.log(currChildDataType);
                         var jc=[];
                         for (var i = 0; i < parentUl.length; i++) {
@@ -650,8 +666,10 @@ $(function() {
                         };
                         // parentUllength = jc;
                         //console.log(jc,jc[$.inArray(currentChieldIndex,jc) + 1]);
+                        parentUl.removeClass('animate');
                         
-                        showPreview(parentUl.eq(jc[$.inArray(currentChieldIndex,jc) - 1]));                                       
+                        if(jc.length > 1)
+                            showPreview(parentUl.eq(jc[$.inArray(currentChieldIndex,jc) - 1]));                                                           
                     });
                 }
 
