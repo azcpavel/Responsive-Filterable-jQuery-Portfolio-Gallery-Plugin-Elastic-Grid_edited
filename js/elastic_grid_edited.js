@@ -21,7 +21,7 @@
 var $event = $.event,
 $special,
 resizeTimeout;
-
+var $nextObj,$prevObj;
 $special = $event.special.debouncedresize = {
     setup: function() {
         $( this ).on( "resize", $special.handler );
@@ -583,11 +583,14 @@ $(function() {
 
                         if($('#portfolio-filter').find('li[class=current]').children().data('filter') == '.all')
                         {
-                            if($(this).parent().parent().parent().next().length != 0)
-                                showPreview($(this).parent().parent().parent().next());
-                            setTimeout(function(){                              
-                                $('html,body').animate({scrollTop:($('.og-expander').length > 1) ? $('.og-expander')[1].offsetTop  : $('.og-expander')[0].offsetTop },1000);
-                            },1000);
+                           if($(this).parent().parent().parent().next().length > 0)
+                            {                              
+                                $nextObj = $(this).parent().parent().parent().next();
+                                showPreview($nextObj);
+                                setTimeout(function(){                                                                                                  
+                                    $('html,body').animate({scrollTop: $nextObj.offset().top },1000);
+                                },1000);
+                            }
                             return;
                         }                        
                         
@@ -617,12 +620,15 @@ $(function() {
                             }                            
                         };                        
                         
-                        if(jc.length > 1)
-                            showPreview(parentUl.eq(jc[$.inArray(currentChieldIndex,jc) + 1]));
-
-                        setTimeout(function(){                              
-                            $('html,body').animate({scrollTop:($('.og-expander').length > 1) ? $('.og-expander')[1].offsetTop  : $('.og-expander')[0].offsetTop },1000);
-                        },1000);                                       
+                        if(parentUl.eq(jc[$.inArray(currentChieldIndex,jc) + 1]).length > 0)                            
+                        {
+                            $nextObj = parentUl.eq(jc[$.inArray(currentChieldIndex,jc) + 1]);
+                            showPreview($nextObj);
+                            setTimeout(function(){                                                                                                  
+                                $('html,body').animate({scrollTop: $nextObj.offset().top },1000);
+                            },1000);
+                        }
+                                      
                     });
 
                     this.$itemPrev = $('<span>'+config.exControlsPrevText+'</span>');
@@ -642,11 +648,14 @@ $(function() {
 
                         if($('#portfolio-filter').find('li[class=current]').children().data('filter') == '.all')
                         {
-                            if($(this).parent().parent().parent().prev().length != 0)
-                                showPreview($(this).parent().parent().parent().prev());
-                            setTimeout(function(){                              
-                                $('html,body').animate({scrollTop:($('.og-expander').length > 1) ? $('.og-expander')[1].offsetTop  : $('.og-expander')[0].offsetTop },1000);
-                            },1000);
+                            if($(this).parent().parent().parent().prev().length > 0)
+                            {                              
+                                $prevObj = $(this).parent().parent().parent().prev();
+                                showPreview($nextObj);
+                                setTimeout(function(){                                                                                                  
+                                    $('html,body').animate({scrollTop: $nextObj.offset().top },1000);
+                                },1000);
+                            }
                             return;
                         }                        
                         
@@ -676,12 +685,14 @@ $(function() {
                             }                            
                         };                        
 
-                        if(jc.length > 1)
-                            showPreview(parentUl.eq(jc[$.inArray(currentChieldIndex,jc) - 1]));
-
-                        setTimeout(function(){                              
-                            $('html,body').animate({scrollTop:($('.og-expander').length > 1) ? $('.og-expander')[1].offsetTop  : $('.og-expander')[0].offsetTop },1000);
-                        },1000);                                                           
+                        if(parentUl.eq(jc[$.inArray(currentChieldIndex,jc) - 1]).length > 0)                            
+                        {
+                            $prevObj = parentUl.eq(jc[$.inArray(currentChieldIndex,jc) - 1]);
+                            showPreview($prevObj);
+                            setTimeout(function(){                                                                                                  
+                                $('html,body').animate({scrollTop: $prevObj.offset().top },1000);
+                            },1000);
+                        }                                                           
                     });
                 }
 
