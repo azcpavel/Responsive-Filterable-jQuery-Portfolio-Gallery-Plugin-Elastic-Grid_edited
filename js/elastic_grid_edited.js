@@ -6,7 +6,7 @@
 *   added hideInfoBox config for hide title in infobox    
 *   added onClickEvent config for exec after click on figure
 *   added navigation config & options
-*   
+*   https://github.com/azcpavel/Responsive-Filterable-jQuery-Portfolio-Gallery-Plugin-Elastic-Grid_edited  
 */
 
 /*
@@ -651,9 +651,9 @@ $(function() {
                             if($(this).parent().parent().parent().prev().length > 0)
                             {                              
                                 $prevObj = $(this).parent().parent().parent().prev();
-                                showPreview($nextObj);
+                                showPreview($prevObj);
                                 setTimeout(function(){                                                                                                  
-                                    $('html,body').animate({scrollTop: $nextObj.offset().top },1000);
+                                    $('html,body').animate({scrollTop: $prevObj.offset().top },1000);
                                 },1000);
                             }
                             return;
