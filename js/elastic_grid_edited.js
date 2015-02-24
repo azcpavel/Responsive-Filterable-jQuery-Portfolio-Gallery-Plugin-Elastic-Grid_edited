@@ -1,6 +1,6 @@
 /*  
 *   @author vukhanhtruong
-*   @edited by Ahsan Zahid Chowdhury <azc.pavel@gmail.com>
+*   @edited by Ahsan Zahid Chowdhury <azc.pavel@gmail.com> - http://itszahid.info
 *   @date 2014-09-17
 *   loading html instead of image
 *   added hideInfoBox config for hide title in infobox    
@@ -761,7 +761,10 @@ $(function() {
                             if(i==0){
                                 ObjA.addClass('first');
                             }
-                            ObjA.attr("href", urlList[i]['url']);
+                            if(urlList[i]['click'])
+                                ObjA.attr("onclick", urlList[i]['click']);
+                            if(urlList[i]['url'])
+                                ObjA.attr("href", urlList[i]['url']);
                             ObjA.html( urlList[i]['title']);
                             this.$detailButtonList.append(ObjA);
                         }
