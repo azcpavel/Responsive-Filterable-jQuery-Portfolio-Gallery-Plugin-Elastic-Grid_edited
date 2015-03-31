@@ -346,6 +346,10 @@ $(function() {
             }
         });
 
+        setTimeout(function (){
+            $('html,body').animate({scrollTop:$this.offset().top-100},1000);
+        },1000);
+
         return false;
     });
 
@@ -761,10 +765,11 @@ $(function() {
                             if(i==0){
                                 ObjA.addClass('first');
                             }
+                            
                             if(urlList[i]['click'])
                                 ObjA.attr("onclick", urlList[i]['click']);
                             if(urlList[i]['url'])
-                                ObjA.attr("href", urlList[i]['url']);
+                                ObjA.attr({"href": urlList[i]['url'],'target':'_blank'});                            
                             ObjA.html( urlList[i]['title']);
                             this.$detailButtonList.append(ObjA);
                         }
