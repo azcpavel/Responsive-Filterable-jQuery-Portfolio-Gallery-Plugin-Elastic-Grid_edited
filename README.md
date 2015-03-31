@@ -33,7 +33,7 @@ $(function(){
                     'large'         : ['<img src="http://www.itszahid.info/images/acc/1.png"/>', '<img src="http://www.itszahid.info/images/acc/2.png"/>'],
                     'button_list'   :
                     [
-                        { 'title':'Demo', 'url' : 'http://www.exceptionsolutions.info/projects/account' }                        
+                        { 'title':'Demo', 'url' : 'http://www.itszahid.info/projects/account' }                        
                     ],
                     'tags'          : ['Web Application']                    
                 }
