@@ -710,7 +710,7 @@ $(function() {
                 this.$details = $( '<div class="og-details"></div>' ).append( this.$title, this.$description, this.$detailButtonList );
                 this.$loading = $( '<div class="og-loading"></div>' );
                 this.$fullimage = $( '<div class="og-fullimg"></div>' ).append( this.$loading );
-                this.$closePreview = $( '<span class="og-close"></span>' );                
+                this.$closePreview = $( '<span class="og-close" style="z-index:1;"></span>' );                
                 this.$previewInner = $( '<div class="og-expander-inner"></div>' ).append( this.$itemNext, this.$itemPrev, this.$closePreview, this.$fullimage, this.$details );
                 this.$previewEl = $( '<div class="og-expander"></div>' ).append( this.$previewInner );
 
